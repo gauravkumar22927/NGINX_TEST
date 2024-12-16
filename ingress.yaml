@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-web-app-ingress
+  namespace: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/ratelimit-limit: "10"
+    traefik.ingress.kubernetes.io/ratelimit-burst: "20"
+    traefik.ingress.kubernetes.io/ratelimit-period: "1s"
+spec:
+  tls:
+    - hosts:
+        - example.local
+      secretName: my-web-app-tls
+  rules:
+    - host: example.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-web-app-service
+                port:
+                  number: 80

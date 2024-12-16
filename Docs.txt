@@ -1,0 +1,45 @@
+// using Rancher desktop instead of minikube for ingress
+// kubectl edit ingressclass traefik - used for ingress by rancherdesktop as addons
+//while checking with below command it was present inside kube-system -> so changed to traefik
+
+kubectl get ingressclass traefik -o yaml -> change kube-system to traefik
+//edited  line -> meta.helm.sh/release-namespace: kube-system 
+
+//Verify the Installation
+//After resolving the conflict, verify that Traefik is installed and running:
+kubectl get pods -n traefik
+kubectl get pods -n kube-system
+kubectl get ingressclass
+
+// create Dockerfile and index.html file also add image, build and push image to dockerhub
+docker build -t my-web-app .
+docker tag my-web-app:latest <your-username>/my-web-app:latest
+docker push gaurav22927/my-web-app:latest
+
+// create deployment.yaml and service.yaml file
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+
+// kubectl get svc my-web-app-service -> should return like below
+kubectl get svc my-web-app-service
+NAME                 TYPE           CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+my-web-app-service   LoadBalancer   10.43.50.24   <pending>     80:31368/TCP   15s
+
+// Set Up TLS (HTTPS) with Certificates
+// Cert-Manager helps manage certificates within your cluster. Run the following commands to install Cert-Manager:
+
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.11.0/cert-manager.yaml
+
+// create cluster-issuer.yaml file
+kubectl apply -f cluster-issuer.yaml
+
+// Configure TLS for Your Ingress:
+// create ingress.yaml file
+
+// use metallb as LoadBalancer for kubectl -> as external ip is NULL
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+
+
+
+
