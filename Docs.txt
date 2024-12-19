@@ -40,6 +40,20 @@ kubectl apply -f cluster-issuer.yaml
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
 
+kubectl describe service my-web-app-service
+
+// issue with cert manager
+kubectl describe certificate my-web-app-tls -n traefik
+
+// to create self signed cert
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=example.local/O=example.local"
+kubectl create secret tls my-web-app-tls --key tls.key --cert tls.crt -n traefik
 
 
+kubectl get service traefik -n kube-system
+NAME      TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)                      AGE
+traefik   LoadBalancer   10.43.22.233   192.168.127.101   80:31513/TCP,443:31861/TCP   111d
 
+kubectl get ingress
+NAME                 CLASS     HOSTS           ADDRESS           PORTS     AGE
+my-web-app-ingress   traefik   example.local   192.168.127.100   80, 443   78m
